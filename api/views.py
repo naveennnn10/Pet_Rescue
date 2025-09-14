@@ -6,7 +6,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 class HelloAPI(APIView):
     permission_classes = [AllowAny]
 
@@ -34,3 +34,18 @@ class PetViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(modified_by=self.request.user)
+
+# api/views.py
+from rest_framework import generics, permissions
+from rest_framework.parsers import MultiPartParser, FormParser
+from .models import Pet
+from .serializers import PetSerializer
+
+class PetCreateAPIView(generics.CreateAPIView):
+    queryset = Pet.objects.all()
+    serializer_class = PetSerializer
+    permission_classes = [permissions.AllowAny]   # change to AllowAny for testing (not recommended)
+    parser_classes = [JSONParser, MultiPartParser, FormParser]      # handle file uploads
+
+    def perform_create(self, serializer):
+        serializer.save()
